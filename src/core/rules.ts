@@ -1,6 +1,6 @@
 import type { GameState, PlayerId, DiceRoll, HexCoord } from '../types';
 import { areAdjacent, getNeighbors } from './hex';
-import { getBoundaryHexes, getConnectedComponents } from './map';
+import { getConnectedComponents } from './map';
 
 export class GameEngine {
   private rng: () => number;
