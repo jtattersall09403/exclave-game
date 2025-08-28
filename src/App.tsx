@@ -13,10 +13,6 @@ function App() {
     setGameStarted(true);
   };
 
-  const handleNewGame = () => {
-    setGameStarted(false);
-  };
-
   return (
     <GameProvider>
       <div className="app">
@@ -27,9 +23,6 @@ function App() {
             <HUD />
             <Board />
             <DicePanel />
-            <button className="new-game-button" onClick={handleNewGame}>
-              New Game
-            </button>
           </div>
         )}
       </div>

@@ -186,7 +186,8 @@ function UnitStack({ x, y, units, color, showNumbers }: UnitStackProps) {
           fill="#FFFFFF"
           pointerEvents="none"
           style={{ 
-            textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000'
+            WebkitTextStroke: '2px #000000',
+            textShadow: 'none'
           }}
         >
           {units}

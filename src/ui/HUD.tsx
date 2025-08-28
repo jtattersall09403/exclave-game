@@ -1,5 +1,6 @@
 import { useGame, useGameActions } from '../state';
 import type { PlayerId } from '../types';
+import { useState, useEffect } from 'react';
 
 function getPlayerColor(playerId: PlayerId): string {
   switch (playerId) {
@@ -131,9 +132,38 @@ function getContextHint(phase: 'reinforce' | 'attack' | 'move', reinfLeft: numbe
   return 'End turn to score';
 }
 
+function TurnTransitionPopup({ playerId, onClose }: { playerId: PlayerId; onClose: () => void }) {
+  const playerName = getPlayerName(playerId);
+  const playerColor = getPlayerColor(playerId);
+  
+  useEffect(() => {
+    const timer = setTimeout(onClose, 2000); // Auto-close after 2 seconds
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+    <div className="turn-transition-overlay" onClick={onClose}>
+      <div className="turn-transition-popup" style={{ borderColor: playerColor }}>
+        <h2 style={{ color: playerColor }}>{playerName}'s Turn</h2>
+        <p>Get ready to dominate the battlefield!</p>
+      </div>
+    </div>
+  );
+}
+
 export function HUD() {
   const { state, engine } = useGame();
-  const { endTurn } = useGameActions();
+  const { endTurn, newGame } = useGameActions();
+  const [showTurnTransition, setShowTurnTransition] = useState(false);
+  const [lastCurrentPlayer, setLastCurrentPlayer] = useState(state.current);
+
+  // Detect player changes and show turn transition
+  useEffect(() => {
+    if (state.current !== lastCurrentPlayer && state.phase === 'reinforce') {
+      setShowTurnTransition(true);
+      setLastCurrentPlayer(state.current);
+    }
+  }, [state.current, state.phase, lastCurrentPlayer]);
 
   const hasValidMoves = engine.hasValidMoves(state);
   const canEndTurn = engine.canEndTurn(state);
@@ -148,6 +178,12 @@ export function HUD() {
 
   return (
     <>
+      {showTurnTransition && (
+        <TurnTransitionPopup 
+          playerId={state.current}
+          onClose={() => setShowTurnTransition(false)}
+        />
+      )}
       <div className="top-hud">
         <div className="game-info">
           <div className="turn-info">
@@ -177,7 +213,7 @@ export function HUD() {
             </div>
           </div>
 
-          <div className="context-hint">
+          <div className="context-hint" style={{ color: getPlayerColor(state.current) }}>
             {isGameOver && winner !== null 
               ? `Game Over! ${getPlayerName(winner)} wins!`
               : getContextHint(state.phase, state.reinfLeft, hasValidMoves, state.actionsLeft)
@@ -193,6 +229,12 @@ export function HUD() {
                 End Turn
               </button>
             )}
+            <button 
+              className="new-game-button"
+              onClick={() => newGame(state.players.length as 2 | 3, undefined, state.winGoal)}
+            >
+              New Game
+            </button>
           </div>
         </div>
       </div>
