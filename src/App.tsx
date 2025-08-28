@@ -3,6 +3,7 @@ import { GameProvider } from './state';
 import { Welcome } from './ui/Welcome';
 import { Board } from './ui/Board';
 import { HUD } from './ui/HUD';
+import { Controls } from './ui/Controls';
 import { DicePanel } from './ui/DicePanel';
 import './App.css';
 
@@ -22,6 +23,7 @@ function App() {
           <div className="game-view">
             <HUD />
             <Board />
+            <Controls />
             <DicePanel />
           </div>
         )}

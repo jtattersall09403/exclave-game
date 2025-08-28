@@ -156,6 +156,9 @@ export function DicePanel() {
 
   const outcome = currentRoll.attackerWins ? 'Attacker Wins!' : 'Defender Wins!';
   const outcomeClass = currentRoll.attackerWins ? 'attacker-wins' : 'defender-wins';
+  const winnerColor = currentRoll.attackerWins 
+    ? getPlayerColor(currentRoll.attackerId) 
+    : getPlayerColor(currentRoll.defenderId);
 
   return (
     <div 
@@ -171,7 +174,7 @@ export function DicePanel() {
         
         {showOutcome && (
           <>
-            <div className={`outcome ${outcomeClass}`}>
+            <div className={`outcome ${outcomeClass}`} style={{ color: winnerColor }}>
               {outcome}
             </div>
 

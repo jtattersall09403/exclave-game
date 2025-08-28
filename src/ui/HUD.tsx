@@ -1,4 +1,4 @@
-import { useGame, useGameActions } from '../state';
+import { useGame } from '../state';
 import type { PlayerId } from '../types';
 import { useState, useEffect } from 'react';
 
@@ -135,17 +135,28 @@ function getContextHint(phase: 'reinforce' | 'attack' | 'move', reinfLeft: numbe
 function TurnTransitionPopup({ playerId, onClose }: { playerId: PlayerId; onClose: () => void }) {
   const playerName = getPlayerName(playerId);
   const playerColor = getPlayerColor(playerId);
-  
-  useEffect(() => {
-    const timer = setTimeout(onClose, 2000); // Auto-close after 2 seconds
-    return () => clearTimeout(timer);
-  }, [onClose]);
 
   return (
     <div className="turn-transition-overlay" onClick={onClose}>
-      <div className="turn-transition-popup" style={{ borderColor: playerColor }}>
-        <h2 style={{ color: playerColor }}>{playerName}'s Turn</h2>
-        <p>Get ready to dominate the battlefield!</p>
+      <div className="turn-transition-popup" style={{ borderColor: playerColor }} onClick={(e) => e.stopPropagation()}>
+        <button className="popup-close-button" onClick={onClose}>×</button>
+        <h2 style={{ color: playerColor }}>{playerName}</h2>
+        <p>Phase 1: Reinforce. Tap your tiles to add units.</p>
+      </div>
+    </div>
+  );
+}
+
+function AttackPhasePopup({ playerId, onClose }: { playerId: PlayerId; onClose: () => void }) {
+  const playerName = getPlayerName(playerId);
+  const playerColor = getPlayerColor(playerId);
+
+  return (
+    <div className="turn-transition-overlay" onClick={onClose}>
+      <div className="turn-transition-popup" style={{ borderColor: playerColor }} onClick={(e) => e.stopPropagation()}>
+        <button className="popup-close-button" onClick={onClose}>×</button>
+        <h2 style={{ color: playerColor }}>{playerName}: Attack Phase</h2>
+        <p>Tap a tile you control, then a neighbouring tile to move or attack</p>
       </div>
     </div>
   );
@@ -153,28 +164,46 @@ function TurnTransitionPopup({ playerId, onClose }: { playerId: PlayerId; onClos
 
 export function HUD() {
   const { state, engine } = useGame();
-  const { endTurn, newGame } = useGameActions();
   const [showTurnTransition, setShowTurnTransition] = useState(false);
+  const [showAttackPhase, setShowAttackPhase] = useState(false);
   const [lastCurrentPlayer, setLastCurrentPlayer] = useState(state.current);
+  const [lastPhase, setLastPhase] = useState(state.phase);
+  const [hasShownInitialPopup, setHasShownInitialPopup] = useState(false);
 
-  // Detect player changes and show turn transition
+  // Show initial popup for Player 1 when game starts
+  useEffect(() => {
+    if (!hasShownInitialPopup && state.phase === 'reinforce' && state.current === 0) {
+      setShowTurnTransition(true);
+      setHasShownInitialPopup(true);
+    }
+  }, [hasShownInitialPopup, state.phase, state.current]);
+
+  // Detect player changes and show turn transition (with delay if dice panel might be showing)
   useEffect(() => {
     if (state.current !== lastCurrentPlayer && state.phase === 'reinforce') {
-      setShowTurnTransition(true);
-      setLastCurrentPlayer(state.current);
+      // Delay the turn transition to allow dice panel to close first
+      const delay = setTimeout(() => {
+        setShowTurnTransition(true);
+        setLastCurrentPlayer(state.current);
+      }, 3500); // Wait for dice panel to close (3000ms) + small buffer
+      
+      return () => clearTimeout(delay);
     }
   }, [state.current, state.phase, lastCurrentPlayer]);
 
+  // Detect phase change from reinforce to attack
+  useEffect(() => {
+    if (lastPhase === 'reinforce' && state.phase === 'attack') {
+      setShowAttackPhase(true);
+      setLastPhase(state.phase);
+    } else if (state.phase !== lastPhase) {
+      setLastPhase(state.phase);
+    }
+  }, [state.phase, lastPhase]);
+
   const hasValidMoves = engine.hasValidMoves(state);
-  const canEndTurn = engine.canEndTurn(state);
   const isGameOver = engine.isGameOver(state);
   const winner = engine.getWinner(state);
-
-  const handleEndTurn = () => {
-    if (canEndTurn || !hasValidMoves || state.actionsLeft === 0) {
-      endTurn();
-    }
-  };
 
   return (
     <>
@@ -184,58 +213,46 @@ export function HUD() {
           onClose={() => setShowTurnTransition(false)}
         />
       )}
+      {showAttackPhase && (
+        <AttackPhasePopup 
+          playerId={state.current}
+          onClose={() => setShowAttackPhase(false)}
+        />
+      )}
       <div className="top-hud">
-        <div className="game-info">
-          <div className="turn-info">
-            <div className="current-player">
-              <span style={{ color: getPlayerColor(state.current) }}>
-                {getPlayerName(state.current)}
-              </span>
+        <div className="compact-game-info">
+          <span style={{ color: getPlayerColor(state.current) }}>
+            {getPlayerName(state.current)}
+          </span>
+          {' • '}
+          <span className="phase">
+            {getPhaseText(state.phase)}
+          </span>
+          {state.phase === 'reinforce' && (
+            <>
               {' • '}
-              <span className="phase">
-                {getPhaseText(state.phase)}
-              </span>
-              {state.phase === 'reinforce' && (
-                <ReinforcementCounter 
-                  count={state.reinfLeft} 
-                  playerColor={getPlayerColor(state.current)} 
-                />
-              )}
-              {state.phase === 'attack' && (
-                <ActionCounter 
-                  count={state.actionsLeft} 
-                  playerColor={getPlayerColor(state.current)} 
-                />
-              )}
-            </div>
-            <div className="round-info">
-              First to {state.winGoal} exclaves wins!
-            </div>
-          </div>
-
-          <div className="context-hint" style={{ color: getPlayerColor(state.current) }}>
+              <ReinforcementCounter 
+                count={state.reinfLeft} 
+                playerColor={getPlayerColor(state.current)} 
+              />
+            </>
+          )}
+          {state.phase === 'attack' && (
+            <>
+              {' • '}
+              <ActionCounter 
+                count={state.actionsLeft} 
+                playerColor={getPlayerColor(state.current)} 
+              />
+            </>
+          )}
+          {' • '}
+          <span className="context-hint" style={{ color: getPlayerColor(state.current) }}>
             {isGameOver && winner !== null 
               ? `Game Over! ${getPlayerName(winner)} wins!`
               : getContextHint(state.phase, state.reinfLeft, hasValidMoves, state.actionsLeft)
             }
-          </div>
-
-          <div className="controls">
-            {(canEndTurn || !hasValidMoves || state.actionsLeft === 0) && !isGameOver && (
-              <button 
-                className="end-turn-button"
-                onClick={handleEndTurn}
-              >
-                End Turn
-              </button>
-            )}
-            <button 
-              className="new-game-button"
-              onClick={() => newGame(state.players.length as 2 | 3, undefined, state.winGoal)}
-            >
-              New Game
-            </button>
-          </div>
+          </span>
         </div>
       </div>
 

@@ -29,6 +29,7 @@ body {
     radial-gradient(circle at 20% 80%, rgba(102, 255, 87, 0.1) 0%, transparent 50%),
     radial-gradient(circle at 80% 20%, rgba(255, 75, 209, 0.1) 0%, transparent 50%),
     radial-gradient(circle at 40% 40%, rgba(46, 231, 255, 0.1) 0%, transparent 50%);
+  overflow-y: scroll;
 }
 
 /* Welcome Screen */
@@ -37,7 +38,6 @@ body {
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 100%;
   background: 
     radial-gradient(circle at 20% 80%, rgba(102, 255, 87, 0.2) 0%, transparent 70%),
     radial-gradient(circle at 80% 20%, rgba(255, 75, 209, 0.2) 0%, transparent 70%);
@@ -162,14 +162,14 @@ body {
   grid-template-areas: 
     "top-hud"
     "board"
+    "controls"
     "bottom-hud";
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 1fr auto auto;
   min-height: 100vh;
-  height: 100dvh; /* Dynamic viewport height for mobile */
   width: 100vw;
   gap: 0.5rem;
-  overflow: auto;
   padding: 0.5rem;
+  overflow-y: auto;
 }
 
 /* HUD Styles */
@@ -177,8 +177,33 @@ body {
   grid-area: top-hud;
   background: rgba(0, 0, 0, 0.4);
   border-radius: 10px;
-  padding: 0.75rem;
+  padding: 0.5rem 0.75rem;
   border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.compact-game-info {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+@media (max-width: 600px) {
+  .compact-game-info {
+    font-size: 0.8rem;
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+.controls-section {
+  grid-area: controls;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.5rem;
 }
 
 .bottom-hud {
@@ -288,11 +313,10 @@ body {
 .reinforcement-counter {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-left: 1rem;
-  padding: 0.25rem 0.5rem;
+  gap: 0.25rem;
+  padding: 0.15rem 0.4rem;
   background: rgba(0, 0, 0, 0.3);
-  border-radius: 15px;
+  border-radius: 12px;
 }
 
 .reinforcement-label {
@@ -316,11 +340,10 @@ body {
 .action-counter {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-left: 1rem;
-  padding: 0.25rem 0.5rem;
+  gap: 0.25rem;
+  padding: 0.15rem 0.4rem;
   background: rgba(0, 0, 0, 0.3);
-  border-radius: 15px;
+  border-radius: 12px;
 }
 
 .action-label {
@@ -357,6 +380,7 @@ body {
 }
 
 .turn-transition-popup {
+  position: relative;
   background: rgba(0, 0, 0, 0.9);
   border: 4px solid;
   border-radius: 20px;
@@ -377,6 +401,28 @@ body {
   font-size: 1.2rem;
   margin: 0;
   color: rgba(255, 255, 255, 0.9);
+}
+
+.popup-close-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.popup-close-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 @keyframes fadeIn {
@@ -407,6 +453,35 @@ body {
   
   .turn-transition-popup p {
     font-size: 1rem;
+  }
+
+  .dice-panel {
+    padding: 1rem;
+    max-width: 95vw;
+    border-radius: 10px;
+  }
+
+  .dice-panel-content {
+    gap: 1rem;
+  }
+
+  .dice-roll-display {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .dice-section {
+    min-width: auto;
+    max-width: 100%;
+  }
+
+  .dice-container {
+    max-width: 240px; /* Smaller on mobile */
+  }
+
+  .vs-divider {
+    font-size: 1.5rem;
+    padding: 0.5rem 0;
   }
 }
 
@@ -513,6 +588,7 @@ body {
 }
 
 .move-dialog-content {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -633,6 +709,9 @@ body {
   border: 3px solid rgba(255, 255, 255, 0.3);
   border-radius: 15px;
   padding: 2rem;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
   z-index: 1000;
   opacity: 0;
   visibility: hidden;
@@ -698,7 +777,10 @@ body {
 
 .dice-container {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
+  justify-content: center;
+  max-width: 280px; /* 5 dice * (50px + gap) + some padding */
 }
 
 .dice {

@@ -27,6 +27,7 @@ export function MoveDialog({ isVisible, fromCell, toCell, onMove, onCancel }: Mo
     <div className="move-dialog-overlay">
       <div className="move-dialog">
         <div className="move-dialog-content">
+          <button className="popup-close-button" onClick={onCancel}>×</button>
           <h3>Move Units</h3>
           <p>Move from hex with {fromCell.units} units to hex with {toCell.units} units</p>
           
