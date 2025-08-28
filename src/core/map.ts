@@ -1,4 +1,4 @@
-import { hexGridRectangle, getNeighbors } from './hex';
+import { getNeighbors } from './hex';
 import type { Cell, HexCoord, PlayerId } from '../types';
 
 export interface MapConfig {
@@ -148,17 +148,6 @@ export class MapGenerator {
     return this.getLargestComponent(landHexes);
   }
 
-  private getHexesInRadius(center: HexCoord, radius: number): HexCoord[] {
-    const hexes: HexCoord[] = [];
-    for (let q = -radius; q <= radius; q++) {
-      const r1 = Math.max(-radius, -q - radius);
-      const r2 = Math.min(radius, -q + radius);
-      for (let r = r1; r <= r2; r++) {
-        hexes.push({ q: center.q + q, r: center.r + r });
-      }
-    }
-    return hexes;
-  }
 
   private getLargestComponent(hexes: HexCoord[]): HexCoord[] {
     if (hexes.length === 0) return [];

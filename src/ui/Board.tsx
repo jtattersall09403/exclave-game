@@ -51,9 +51,6 @@ interface HexCellProps {
   isSelected: boolean;
   isHovered: boolean;
   isValidTarget: boolean;
-  isReinforcementTarget: boolean;
-  onHexClick: (cellId: number) => void;
-  onHexHover: (cellId: number | null) => void;
   gamePhase: 'reinforce' | 'attack' | 'move';
   currentPlayer: PlayerId;
 }
@@ -106,7 +103,7 @@ function HexShape({ cell, isSelected, isHovered, isValidTarget, isMoveTarget, is
   );
 }
 
-function HexCell({ cell, isSelected, isHovered, isValidTarget, isReinforcementTarget, onHexClick, onHexHover, gamePhase, currentPlayer }: HexCellProps) {
+function HexCell({ cell, isSelected, isHovered, isValidTarget, gamePhase, currentPlayer }: HexCellProps) {
   const hex = new Hex(cell.q, cell.r);
   const { x, y } = hex.toPixel(HEX_SIZE);
   
@@ -319,14 +316,6 @@ export function Board() {
     }
   };
 
-  const handleMoveRequest = (cellId: number) => {
-    const cell = state.cells.find(c => c.id === cellId);
-    if (!cell || cell.owner !== state.current || cell.units <= 1) return;
-    
-    // Enter movement mode
-    setMoveSource(cellId);
-    deselectCell(); // Clear any attack selection
-  };
 
   const handleMoveConfirm = (unitCount: number) => {
     if (moveSource !== null && moveDestination !== null) {
@@ -399,9 +388,6 @@ export function Board() {
               isSelected={state.selected === cell.id}
               isHovered={hoveredCell === cell.id}
               isValidTarget={glowingTargets.includes(cell.id)}
-              isReinforcementTarget={validReinforcements.includes(cell.id)}
-              onHexClick={handleHexClick}
-              onHexHover={setHoveredCell}
               gamePhase={state.phase}
               currentPlayer={state.current}
             />

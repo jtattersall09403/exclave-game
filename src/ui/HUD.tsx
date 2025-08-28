@@ -22,12 +22,11 @@ function getPlayerName(playerId: PlayerId): string {
 interface ScoreBarProps {
   playerId: PlayerId;
   score: number;
-  maxScore: number;
   winGoal: number;
   isCurrentPlayer: boolean;
 }
 
-function ScoreBar({ playerId, score, maxScore, winGoal, isCurrentPlayer }: ScoreBarProps) {
+function ScoreBar({ playerId, score, winGoal, isCurrentPlayer }: ScoreBarProps) {
   const color = getPlayerColor(playerId);
   const name = getPlayerName(playerId);
   const width = winGoal > 0 ? (score / winGoal) * 100 : 0;
@@ -52,7 +51,7 @@ function ScoreBar({ playerId, score, maxScore, winGoal, isCurrentPlayer }: Score
   );
 }
 
-function getPhaseText(phase: 'reinforce' | 'attack' | 'move', reinfLeft: number): string {
+function getPhaseText(phase: 'reinforce' | 'attack' | 'move'): string {
   if (phase === 'reinforce') {
     return `Reinforce`;
   }
@@ -136,7 +135,6 @@ export function HUD() {
   const { state, engine } = useGame();
   const { endTurn } = useGameActions();
 
-  const maxScore = Math.max(...state.players.map(p => state.scores[p]));
   const hasValidMoves = engine.hasValidMoves(state);
   const canEndTurn = engine.canEndTurn(state);
   const isGameOver = engine.isGameOver(state);
@@ -159,7 +157,7 @@ export function HUD() {
               </span>
               {' • '}
               <span className="phase">
-                {getPhaseText(state.phase, state.reinfLeft)}
+                {getPhaseText(state.phase)}
               </span>
               {state.phase === 'reinforce' && (
                 <ReinforcementCounter 
@@ -206,7 +204,6 @@ export function HUD() {
               key={playerId}
               playerId={playerId}
               score={state.scores[playerId]}
-              maxScore={maxScore}
               winGoal={state.winGoal}
               isCurrentPlayer={playerId === state.current}
             />
