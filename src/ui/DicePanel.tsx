@@ -92,7 +92,7 @@ function DiceRollDisplay({ roll, isAnimating }: DiceRollDisplayProps) {
             <Dice key={index} value={value} isAnimating={isAnimating} />
           ))}
         </div>
-        <div className="dice-total" style={{ color: attackerColor }}>Total: {roll.attackerTotal}</div>
+        {!isAnimating && <div className="dice-total" style={{ color: attackerColor }}>Total: {roll.attackerTotal}</div>}
       </div>
 
       <div className="vs-divider">VS</div>
@@ -104,7 +104,7 @@ function DiceRollDisplay({ roll, isAnimating }: DiceRollDisplayProps) {
             <Dice key={index} value={value} isAnimating={isAnimating} />
           ))}
         </div>
-        <div className="dice-total" style={{ color: defenderColor }}>Total: {roll.defenderTotal}</div>
+        {!isAnimating && <div className="dice-total" style={{ color: defenderColor }}>Total: {roll.defenderTotal}</div>}
       </div>
     </div>
   );
@@ -114,6 +114,7 @@ export function DicePanel() {
   const { lastDiceRoll } = useGame();
   const [isVisible, setIsVisible] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [showOutcome, setShowOutcome] = useState(false);
   const [currentRoll, setCurrentRoll] = useState<DiceRoll | null>(null);
 
   useEffect(() => {
@@ -121,9 +122,11 @@ export function DicePanel() {
       setCurrentRoll(lastDiceRoll);
       setIsVisible(true);
       setIsAnimating(true);
+      setShowOutcome(false); // Hide outcome initially
 
       const animationTimeout = setTimeout(() => {
         setIsAnimating(false);
+        setShowOutcome(true); // Show outcome after animation completes
       }, 700);
 
       const hideTimeout = setTimeout(() => {
@@ -166,16 +169,20 @@ export function DicePanel() {
         
         <DiceRollDisplay roll={currentRoll} isAnimating={isAnimating} />
         
-        <div className={`outcome ${outcomeClass}`}>
-          {outcome}
-        </div>
+        {showOutcome && (
+          <>
+            <div className={`outcome ${outcomeClass}`}>
+              {outcome}
+            </div>
 
-        <div className="dice-explanation">
-          {currentRoll.attackerWins 
-            ? 'All units move to target. Origin left empty!'
-            : 'Origin flips to defender. Sacrificial rule applied!'
-          }
-        </div>
+            <div className="dice-explanation">
+              {currentRoll.attackerWins 
+                ? 'All but one units move to target.'
+                : 'Origin flips to defender.'
+              }
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
