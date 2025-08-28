@@ -122,6 +122,11 @@ export class GameEngine {
     // Check for new exclaves after combat and award points
     this.updateExclaveScores(newState);
 
+    // Auto-end turn if no actions left
+    if (newState.actionsLeft <= 0) {
+      return { state: this.endTurn(newState), dice };
+    }
+
     return { state: newState, dice };
   }
 
@@ -203,6 +208,11 @@ export class GameEngine {
 
     // Consume one action for the move
     newState.actionsLeft = state.actionsLeft - 1;
+
+    // Auto-end turn if no actions left
+    if (newState.actionsLeft <= 0) {
+      return this.endTurn(newState);
+    }
 
     return newState;
   }
