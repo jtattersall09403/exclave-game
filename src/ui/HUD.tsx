@@ -178,16 +178,11 @@ export function HUD() {
     }
   }, [hasShownInitialPopup, state.phase, state.current]);
 
-  // Detect player changes and show turn transition (with delay if dice panel might be showing)
+  // Detect player changes and show turn transition
   useEffect(() => {
     if (state.current !== lastCurrentPlayer && state.phase === 'reinforce') {
-      // Delay the turn transition to allow dice panel to close first
-      const delay = setTimeout(() => {
-        setShowTurnTransition(true);
-        setLastCurrentPlayer(state.current);
-      }, 3500); // Wait for dice panel to close (3000ms) + small buffer
-      
-      return () => clearTimeout(delay);
+      setShowTurnTransition(true);
+      setLastCurrentPlayer(state.current);
     }
   }, [state.current, state.phase, lastCurrentPlayer]);
 

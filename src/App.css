@@ -701,10 +701,7 @@ body {
 
 /* Dice Panel */
 .dice-panel {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  position: relative;
   background: rgba(0, 0, 0, 0.9);
   border: 3px solid rgba(255, 255, 255, 0.3);
   border-radius: 15px;
@@ -712,16 +709,8 @@ body {
   max-width: 90vw;
   max-height: 90vh;
   overflow: auto;
-  z-index: 1000;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s ease;
 }
 
-.dice-panel.visible {
-  opacity: 1;
-  visibility: visible;
-}
 
 .dice-panel-content {
   display: flex;

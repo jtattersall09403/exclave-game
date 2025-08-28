@@ -129,13 +129,10 @@ export function DicePanel() {
         setShowOutcome(true); // Show outcome after animation completes
       }, 700);
 
-      const hideTimeout = setTimeout(() => {
-        setIsVisible(false);
-      }, 3000);
+      // Removed auto-hide - user must manually close
 
       return () => {
         clearTimeout(animationTimeout);
-        clearTimeout(hideTimeout);
       };
     }
   }, [lastDiceRoll]);
@@ -144,10 +141,8 @@ export function DicePanel() {
     setIsVisible(false);
   };
 
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      handleClose();
-    }
+  const handleBackdropClick = () => {
+    handleClose();
   };
 
   if (!isVisible || !currentRoll) {
@@ -161,31 +156,33 @@ export function DicePanel() {
     : getPlayerColor(currentRoll.defenderId);
 
   return (
-    <div 
-      className={`dice-panel ${isVisible ? 'visible' : ''}`}
-      onClick={handleBackdropClick}
-    >
-      <div className="dice-panel-content">
-        <button className="close-button" onClick={handleClose}>
-          ×
-        </button>
-        
-        <DiceRollDisplay roll={currentRoll} isAnimating={isAnimating} />
-        
-        {showOutcome && (
-          <>
-            <div className={`outcome ${outcomeClass}`} style={{ color: winnerColor }}>
-              {outcome}
-            </div>
+    <div className="turn-transition-overlay" onClick={handleBackdropClick}>
+      <div 
+        className={`dice-panel ${isVisible ? 'visible' : ''}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="dice-panel-content">
+          <button className="close-button" onClick={handleClose}>
+            ×
+          </button>
+          
+          <DiceRollDisplay roll={currentRoll} isAnimating={isAnimating} />
+          
+          {showOutcome && (
+            <>
+              <div className={`outcome ${outcomeClass}`} style={{ color: winnerColor }}>
+                {outcome}
+              </div>
 
-            <div className="dice-explanation">
-              {currentRoll.attackerWins 
-                ? 'All but one units move to target.'
-                : 'Origin flips to defender.'
-              }
-            </div>
-          </>
-        )}
+              <div className="dice-explanation">
+                {currentRoll.attackerWins 
+                  ? 'All but one units move to target.'
+                  : 'Origin flips to defender.'
+                }
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
