@@ -29,7 +29,7 @@ export function Welcome({ onGameStart }: WelcomeProps) {
         />
         
         <div className="instructions">
-          <p>The game of strategy, wit, and niche cartographical idiosyncrasy.</p>
+          <p>The turn-based strategy game where you compete to create pockets of isolated territory.</p>
           <p>First to <em>n</em> exclaves wins!</p>
         </div>
 
