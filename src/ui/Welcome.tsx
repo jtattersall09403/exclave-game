@@ -7,7 +7,7 @@ interface WelcomeProps {
 
 export function Welcome({ onGameStart }: WelcomeProps) {
   const { newGame } = useGameActions();
-  const [winGoal, setWinGoal] = useState(10);
+  const [winGoal, setWinGoal] = useState(5);
 
   const handleStart2P = () => {
     newGame(2, undefined, winGoal);
@@ -29,9 +29,7 @@ export function Welcome({ onGameStart }: WelcomeProps) {
         />
         
         <div className="instructions">
-          <p>Deploy reinforcements</p>
-          <p>Attack enemy hexes</p>
-          <p>Losing an attack flips your origin hex to the enemy</p>
+          <p>The game of strategy, wit, and niche cartographical idiosyncrasy.</p>
           <p>First to <em>n</em> exclaves wins!</p>
         </div>
 

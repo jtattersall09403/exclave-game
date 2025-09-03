@@ -2,39 +2,28 @@
 
 ![Exclave Title Image](public/exclave-splatoon.png)
 
-A lightweight, turn-based strategy game where players create their own exclaves (disconnected regions) to score points.
+*[Play the game here](https://exclave-game.netlify.app/)*
+
+The lightweight, [niche cartographical idiosyncrasy inspired](https://en.wikipedia.org/wiki/Baarle-Hertog), turn-based strategy game where **you** compete to become the nation with the most pointlessly complicated territorial borders.
+
+*Major credit and thanks to the great [Dice Wars](https://www.gamedesign.jp/games/dicewars/) for design and gameplay inspiration*
 
 ## Game Overview
 
-**Exclave** is a hot-seat, turn-based strategy game for 2-3 players. The core mechanic revolves around deliberately creating disconnected territories (exclaves) that are cut off from the board edge. Players score +1 point per exclave at the end of their turn. The game lasts 20 rounds, and the highest score wins.
-
-## Features
-
-- **Hex Grid Board**: Procedurally generated organic landmass on hex grid
-- **Sacrificial Combat**: Losing an attack flips your origin hex to the defender (key to creating exclaves)
-- **Dynamic Scoring**: Score points for each exclave you control at turn end
-- **2P and 3P Modes**: Support for both 2-player and 3-player games
-- **Splatoon-Inspired Visuals**: Bright neon colors and smooth animations
-- **Touch & Mouse Support**: Works on desktop and mobile devices
+**Exclave** is a hot-seat, turn-based strategy game for 2-3 players. Your goal is to create the most [exclaves](https://en.wikipedia.org/wiki/Enclave_and_exclave) surrounded by your opponent's territory. 
 
 ## How to Play
 
 ### Setup
-- Every land hex starts owned by a player
-- Each player's initial territory is contiguous
-- Territories are split roughly evenly
+- Choose a 2P or 3P game, and your target number of exclaves. Five is a good default.
 
 ### Turn Flow
-1. **Reinforce**: Place +1 unit on 3 of your hexes (max 8 units per hex)
-2. **Attack**: Select your hex (≥2 units), then attack adjacent enemy hex
-   - Roll dice: Attacker rolls (units-1) d6, Defender rolls (units) d6
-   - Higher total wins; ties go to defender
-   - **Win**: Origin drops to 1 unit, target captured with moved stack
-   - **Lose**: Origin flips to defender (sacrificial rule - creates exclaves!)
-3. **End Turn**: Score +1 per exclave (connected groups not touching board edge)
+1. **Reinforce**: Add units to your territories. Each unit represents one six-sided die.
+2. **Attack/move**: Select a stack of units to attack with and an enemy territory to attack. Your dice are rolled against theirs. Top score wins.
+3. **End Turn**
 
 ### Victory
-After 20 rounds, player with highest score wins.
+First player to *n* exclaves wins! (Set n during setup, default 5).
 
 ## Development
 
@@ -58,19 +47,3 @@ Visit `http://localhost:8081`
 ```bash
 npm run build
 ```
-
-## Deployment
-
-Configured for Netlify deployment with automatic SPA routing.
-
-## Game Design
-
-The key innovation of Exclave is the **sacrificial rule**: when you lose an attack, your attacking hex flips to the defender. This creates a risk/reward dynamic where losing attacks can actually be beneficial for creating disconnected territories that score points.
-
-## Accessibility
-
-- Color-blind friendly palette option
-- High contrast mode support  
-- Reduced motion support
-- Large touch targets
-- Keyboard navigation support

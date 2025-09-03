@@ -1,6 +1,7 @@
 import { useGame } from '../state';
 import type { PlayerId } from '../types';
 import { useState, useEffect } from 'react';
+import { EndGamePopup } from './EndGamePopup';
 
 function getPlayerColor(playerId: PlayerId): string {
   switch (playerId) {
@@ -117,14 +118,11 @@ function getContextHint(phase: 'reinforce' | 'attack' | 'move', reinfLeft: numbe
   if (phase === 'reinforce' && reinfLeft === 0) {
     return 'Click "End Turn" to switch to attack phase';
   }
-  if (phase === 'move') {
-    return 'Click your stack then a friendly hex to move units';
-  }
   if (phase === 'attack' && actionsLeft <= 0) {
     return 'No actions remaining - end turn';
   }
   if (phase === 'attack' && hasValidMoves) {
-    return 'Select an adjacent enemy to attack or move units';
+    return 'Select an adjacent tile to attack or move';
   }
   if (phase === 'attack' && !hasValidMoves) {
     return 'No valid attacks available - end turn';
@@ -162,13 +160,20 @@ function AttackPhasePopup({ playerId, onClose }: { playerId: PlayerId; onClose: 
   );
 }
 
+
 export function HUD() {
   const { state, engine } = useGame();
   const [showTurnTransition, setShowTurnTransition] = useState(false);
   const [showAttackPhase, setShowAttackPhase] = useState(false);
+  const [showEndGame, setShowEndGame] = useState(false);
   const [lastCurrentPlayer, setLastCurrentPlayer] = useState(state.current);
   const [lastPhase, setLastPhase] = useState(state.phase);
   const [hasShownInitialPopup, setHasShownInitialPopup] = useState(false);
+  
+  const hasValidMoves = engine.hasValidMoves(state);
+  const isGameOver = engine.isGameOver(state);
+  const winner = engine.getWinner(state);
+
 
   // Show initial popup for Player 1 when game starts
   useEffect(() => {
@@ -178,37 +183,56 @@ export function HUD() {
     }
   }, [hasShownInitialPopup, state.phase, state.current]);
 
-  // Detect player changes and show turn transition
+  // Detect game over and show end game popup (with delay to let dice panel close)
   useEffect(() => {
-    if (state.current !== lastCurrentPlayer && state.phase === 'reinforce') {
+    if (isGameOver && winner !== null && !showEndGame) {
+      // Delay the end game popup to ensure dice panel has time to close
+      const endGameDelay = setTimeout(() => {
+        setShowEndGame(true);
+        // Hide other popups when game ends
+        setShowTurnTransition(false);
+        setShowAttackPhase(false);
+      }, 1000); // 1 second delay to let dice panel be dismissed
+      
+      return () => clearTimeout(endGameDelay);
+    }
+  }, [isGameOver, winner, showEndGame]);
+
+  // Detect player changes and show turn transition (only if game not over)
+  useEffect(() => {
+    if (!isGameOver && state.current !== lastCurrentPlayer && state.phase === 'reinforce') {
       setShowTurnTransition(true);
       setLastCurrentPlayer(state.current);
     }
-  }, [state.current, state.phase, lastCurrentPlayer]);
+  }, [state.current, state.phase, lastCurrentPlayer, isGameOver]);
 
-  // Detect phase change from reinforce to attack
+  // Detect phase change from reinforce to attack (only if game not over)
   useEffect(() => {
-    if (lastPhase === 'reinforce' && state.phase === 'attack') {
-      setShowAttackPhase(true);
-      setLastPhase(state.phase);
-    } else if (state.phase !== lastPhase) {
-      setLastPhase(state.phase);
+    if (!isGameOver) {
+      if (lastPhase === 'reinforce' && state.phase === 'attack') {
+        setShowAttackPhase(true);
+        setLastPhase(state.phase);
+      } else if (state.phase !== lastPhase) {
+        setLastPhase(state.phase);
+      }
     }
-  }, [state.phase, lastPhase]);
-
-  const hasValidMoves = engine.hasValidMoves(state);
-  const isGameOver = engine.isGameOver(state);
-  const winner = engine.getWinner(state);
+  }, [state.phase, lastPhase, isGameOver]);
 
   return (
     <>
-      {showTurnTransition && (
+      {showEndGame && (
+        <EndGamePopup 
+          winner={winner || state.current}
+          onClose={() => setShowEndGame(false)}
+        />
+      )}
+      {!isGameOver && showTurnTransition && (
         <TurnTransitionPopup 
           playerId={state.current}
           onClose={() => setShowTurnTransition(false)}
         />
       )}
-      {showAttackPhase && (
+      {!isGameOver && showAttackPhase && (
         <AttackPhasePopup 
           playerId={state.current}
           onClose={() => setShowAttackPhase(false)}

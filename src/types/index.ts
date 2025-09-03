@@ -27,6 +27,8 @@ export interface GameState {
   moveSource?: number | null;
   moveDestination?: number | null;
   winGoal: number;
+  lastDiceRoll?: DiceRoll | null;
+  pendingCombatResult?: GameState | null;
 }
 
 export interface DiceRoll {

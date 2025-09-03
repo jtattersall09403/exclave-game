@@ -119,8 +119,7 @@ export class GameEngine {
     // Consume one action for the attack
     newState.actionsLeft = state.actionsLeft - 1;
 
-    // Check for new exclaves after combat and award points
-    this.updateExclaveScores(newState);
+    // Note: Score updates will be handled after combat resolution is applied
 
     // Auto-end turn if no actions left
     if (newState.actionsLeft <= 0) {
@@ -221,7 +220,7 @@ export class GameEngine {
     return state.reinfLeft === 0 || state.actionsLeft === 0;
   }
 
-  private updateExclaveScores(state: GameState): void {
+  updateExclaveScores(state: GameState): void {
     // Check all players for exclaves and update their scores
     for (const playerId of state.players) {
       const exclaves = this.detectExclaves(state, playerId);

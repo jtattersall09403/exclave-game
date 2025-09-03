@@ -1,12 +1,12 @@
 import { createContext, useContext, useReducer } from 'react';
 import type { ReactNode } from 'react';
-import type { GameState, PlayerId, DiceRoll } from './types';
+import type { GameState, PlayerId } from './types';
 import { GameEngine } from './core/rules';
 import { MapGenerator } from './core/map';
 import { TerritorySplitter } from './core/split';
 
 export interface GameAction {
-  type: 'NEW_GAME' | 'REINFORCE' | 'ATTACK' | 'MOVE' | 'END_TURN' | 'SELECT_CELL' | 'DESELECT';
+  type: 'NEW_GAME' | 'REINFORCE' | 'ATTACK' | 'MOVE' | 'END_TURN' | 'SELECT_CELL' | 'DESELECT' | 'APPLY_COMBAT_RESULT';
   payload?: any;
 }
 
@@ -14,7 +14,6 @@ export interface GameContextType {
   state: GameState;
   dispatch: React.Dispatch<GameAction>;
   engine: GameEngine;
-  lastDiceRoll: DiceRoll | null;
 }
 
 const initialState: GameState = {
@@ -27,13 +26,14 @@ const initialState: GameState = {
   scores: { 0: 0, 1: 0, 2: 0 },
   round: 1,
   selected: null,
-  winGoal: 10
+  winGoal: 10,
+  lastDiceRoll: null,
+  pendingCombatResult: null
 };
 
 const GameContext = createContext<GameContextType | null>(null);
 
 let gameEngine = new GameEngine();
-let lastDiceRoll: DiceRoll | null = null;
 
 function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
@@ -41,7 +41,6 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const { playerCount, seed, winGoal } = action.payload;
       
       gameEngine = new GameEngine(seed);
-      lastDiceRoll = null;
       
       const mapGenerator = new MapGenerator(seed);
       const splitter = new TerritorySplitter(seed);
@@ -80,7 +79,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         scores,
         round: 1,
         selected: null,
-        winGoal: winGoal || 10
+        winGoal: winGoal || 10,
+        lastDiceRoll: null,
+        pendingCombatResult: null
       };
     }
     
@@ -92,8 +93,26 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'ATTACK': {
       const { fromId, toId } = action.payload;
       const result = gameEngine.attack(state, fromId, toId);
-      lastDiceRoll = result.dice;
-      return result.state;
+      // Return current state with dice roll stored, but combat result pending
+      return {
+        ...state,
+        lastDiceRoll: result.dice,
+        pendingCombatResult: result.state
+      };
+    }
+    
+    case 'APPLY_COMBAT_RESULT': {
+      if (state.pendingCombatResult) {
+        const resultState = state.pendingCombatResult;
+        // Update exclave scores after applying combat result
+        gameEngine.updateExclaveScores(resultState);
+        return {
+          ...resultState,
+          lastDiceRoll: null,
+          pendingCombatResult: null
+        };
+      }
+      return state;
     }
     
     case 'MOVE': {
@@ -125,8 +144,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const contextValue: GameContextType = {
     state,
     dispatch,
-    engine: gameEngine,
-    lastDiceRoll
+    engine: gameEngine
   };
   
   return (

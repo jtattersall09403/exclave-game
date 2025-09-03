@@ -111,7 +111,8 @@ function DiceRollDisplay({ roll, isAnimating }: DiceRollDisplayProps) {
 }
 
 export function DicePanel() {
-  const { lastDiceRoll } = useGame();
+  const { state, dispatch } = useGame();
+  const lastDiceRoll = state.lastDiceRoll;
   const [isVisible, setIsVisible] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [showOutcome, setShowOutcome] = useState(false);
@@ -139,6 +140,8 @@ export function DicePanel() {
 
   const handleClose = () => {
     setIsVisible(false);
+    // Apply combat result when popup is closed
+    dispatch({ type: 'APPLY_COMBAT_RESULT' });
   };
 
   const handleBackdropClick = () => {

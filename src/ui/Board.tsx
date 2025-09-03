@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Hex } from '../core/hex';
 import { useGame, useGameActions } from '../state';
 import { MoveDialog } from './MoveDialog';
@@ -33,6 +33,39 @@ function generateHexPath(centerX: number, centerY: number, size: number): string
     points.push([x, y]);
   }
   return `M ${points.map(([x, y]) => `${x},${y}`).join(' L ')} Z`;
+}
+
+function FullscreenButton() {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.log('Error attempting to enable fullscreen:', err.message);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
+  return (
+    <button 
+      className="fullscreen-button-map" 
+      onClick={toggleFullscreen}
+      title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+    >
+      ⛶
+    </button>
+  );
 }
 
 interface HexShapeProps {
@@ -335,6 +368,7 @@ export function Board() {
 
   return (
     <div className="board-container">
+      <FullscreenButton />
       <svg
         className="game-board"
         viewBox={`${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}`}
