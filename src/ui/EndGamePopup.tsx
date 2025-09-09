@@ -180,7 +180,7 @@ export function EndGamePopup({ winner, onClose }: EndGamePopupProps) {
               {playerName} Wins!
             </h1>
             <button 
-              className="new-game-button"
+              className="new-game-button" style={{ background: playerColor }}
               onClick={handleNewGame}
             >
               New Game

@@ -68,6 +68,18 @@ function FullscreenButton() {
   );
 }
 
+function HelpButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button 
+      className="help-button-map" 
+      onClick={onClick}
+      title="How to win"
+    >
+      ?
+    </button>
+  );
+}
+
 interface HexShapeProps {
   cell: Cell;
   isSelected: boolean;
@@ -272,6 +284,40 @@ function lightenColor(color: string, factor: number): string {
   return `#${lighterR.toString(16).padStart(2, '0')}${lighterG.toString(16).padStart(2, '0')}${lighterB.toString(16).padStart(2, '0')}`;
 }
 
+function HelpPopup({ isVisible, onClose }: { isVisible: boolean; onClose: () => void }) {
+  if (!isVisible) return null;
+
+  return (
+    <div className="turn-transition-overlay" onClick={onClose}>
+      <div 
+        className="help-popup" 
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button className="popup-close-button" onClick={onClose}>×</button>
+        <h2>How to win</h2>
+        <div className="help-content">
+          <p><strong>Goal:</strong> First player to create the target number of exclaves wins.</p>
+          
+          <p><strong>What's an exclave?</strong> One or more of your tiles completely surrounded by other players' territory.</p>
+          
+          <p><strong>Each turn:</strong></p>
+          <ol>
+            <li><strong>Reinforce:</strong> Add units to your tiles (each unit = 1 die)</li>
+            <li><strong>Attack/Move:</strong> Attack enemies or move units between your tiles</li>
+            <li><strong>End turn</strong></li>
+          </ol>
+          
+          <p><strong>Combat:</strong> Higher dice total wins. Winner takes the tile.</p>
+          
+          <p><strong>Key strategy:</strong> Deliberately losing an attack will "sacrifice" your attacking tile to the defender. Strategically choosing which tiles to take and which to lose will help you create exclaves.</p>
+          
+          <p><strong>Tip:</strong> Look for opportunities to sacrifice weak tiles to reconnect opponent territories or create your own isolated pockets.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function Board() {
   const { state, engine } = useGame();
   const { reinforce, attack, move, selectCell, deselectCell } = useGameActions();
@@ -279,6 +325,7 @@ export function Board() {
   const [moveSource, setMoveSource] = useState<number | null>(null);
   const [moveDestination, setMoveDestination] = useState<number | null>(null);
   const [showMoveDialog, setShowMoveDialog] = useState(false);
+  const [showHelpPopup, setShowHelpPopup] = useState(false);
 
   if (state.cells.length === 0) {
     return <div className="board-loading">Loading game...</div>;
@@ -369,6 +416,7 @@ export function Board() {
   return (
     <div className="board-container">
       <FullscreenButton />
+      <HelpButton onClick={() => setShowHelpPopup(true)} />
       <svg
         className="game-board"
         viewBox={`${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}`}
@@ -436,6 +484,11 @@ export function Board() {
         toCell={moveDestination ? state.cells.find(c => c.id === moveDestination) : null}
         onMove={handleMoveConfirm}
         onCancel={handleMoveCancel}
+      />
+      
+      <HelpPopup
+        isVisible={showHelpPopup}
+        onClose={() => setShowHelpPopup(false)}
       />
     </div>
   );
